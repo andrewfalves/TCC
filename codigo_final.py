@@ -2,6 +2,7 @@ import csv                          #importando biblioteca csv(arquivos csv)
 from pprint import pprint           #importando biblioteca pprint(impressão em linhas diferentes)
 import gspread                      # importando biblioteca gspread
 from oauth2client.service_account import ServiceAccountCredentials  #importando biblioteca de credenciais de conta
+from gspread.models import Cell
 
 # Configuração para acessar documentos no google drive
 scope = ["https://spreadsheets.google.com/feeds", 'https://www.googleapis.com/auth/spreadsheets',
@@ -30,7 +31,7 @@ with open('D:\Downloads\Easyinvest\ResumoNegociacaoJunho.csv','r') as file: #Cam
     print(numero_elementos)         #impressão do numero de elementos
 
     index = 1                       #definindo uma variável de indexação
-
+    Lista2=[]
     while (index < (numero_elementos)): #loop. Enquanto index for menor que o numero de linhas
 
         LastLine = len(data) + 2  # Escreve na proxima linha em branco
@@ -56,27 +57,25 @@ with open('D:\Downloads\Easyinvest\ResumoNegociacaoJunho.csv','r') as file: #Cam
         # Troca a ordem das colunas 2 e 3
         dados[index][2] = b
         # Troca a ordem das colunas 2 e 3
+        if ((dados[index][4]) != "0"):
+            dados[index][4]=0
+        else:
+            (dados[index][4])=(dados[index][3])
+            (dados[index][3])=0
+        del dados[index][-1]
+        #Lista2[index]=dados[index][-1]
+        #del dados[index][-1]
         index = index+1
         #soma 1 ao index
 
     pprint(dados)
     #impressão da lista final
     index_atualizar = 1
-    while (index_atualizar  < numero_elementos):
-        L1 = index_atualizar
-        C1=  dados[L1][0]
-        C2 = dados[L1][1]
-        C3 = dados[L1][2]
-        C4 = dados[L1][3]
-        print (index_atualizar)
-        sheet.update_cell((L1+1), 1, C1)  # atualiza a célula especifica
-        sheet.update_cell((L1+1), 2, C2)  # atualiza a célula especifica
-        sheet.update_cell((L1+1), 3, C3)  # atualiza a célula especifica
+    cells = []
+    for i in range(numero_elementos):
+        for j in range(4):
+            cells.append(Cell(row=i + 1, col=j + 1, value=dados[i][j]))
+        cells.append(Cell(row=i + 1, col=7, value=dados[i][4]))
 
-        if ((dados[L1][4]) != "0"):
-            sheet.update_cell((L1 + 1), 4, C4)  # atualiza a célula especifica
-
-        else:
-            sheet.update_cell((L1 + 1), 7, C4)  # atualiza a célula especifica
-
-        index_atualizar = (index_atualizar+1)
+    pprint(cells)
+    sheet.update_cells(cells)
